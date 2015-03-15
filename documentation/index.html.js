@@ -110,7 +110,7 @@
 
     <p>
       <b>Latest Version:</b>
-      <a href="http://github.com/jashkenas/coffeescript/tarball/1.9.0">1.9.0</a>
+      <a href="http://github.com/jashkenas/coffeescript/tarball/1.9.1">1.9.1</a>
     </p>
 
     <pre>npm install -g coffee-script</pre>
@@ -806,7 +806,7 @@ Expressions
       it to the current value of <tt>this</tt>, right on the spot. This is helpful
       when using callback-based libraries like Prototype or jQuery, for creating
       iterator functions to pass to <tt>each</tt>, or event-handler functions
-      to use with <tt>bind</tt>. Functions created with the fat arrow are able to access
+      to use with <tt>on</tt>. Functions created with the fat arrow are able to access
       properties of the <tt>this</tt> where they're defined.
     </p>
     <%= codeFor('fat_arrow') %>
@@ -1202,6 +1202,29 @@ Expressions
       <span id="changelog" class="bookmark"></span>
       Change Log
     </h2>
+
+    <p>
+      <%= releaseHeader('2015-02-18', '1.9.1', '1.9.0') %>
+      <ul>
+        <li>
+          Interpolation now works in object literal keys (again). You can use this to 
+          dynamically name properties.
+        </li>
+        <li>
+          Internal compiler variable names no longer start with underscores. This makes
+          the generated JavaScript a bit prettier, and also fixes an issue with
+          the completely broken and ungodly way that AngularJS "parses" function
+          arguments.
+        </li>
+        <li>
+          Fixed a few <tt>yield</tt>-related edge cases with <tt>yield return</tt>
+          and <tt>yield throw</tt>.
+        </li>
+        <li>
+          Minor bug fixes and various improvements to compiler error messages.
+        </li>
+      </ul>
+    </p>
 
     <p>
       <%= releaseHeader('2015-01-29', '1.9.0', '1.8.0') %>

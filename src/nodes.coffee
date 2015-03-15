@@ -90,7 +90,7 @@ exports.Base = class Base
         meth = 'call'
       func = new Value func, [new Access new Literal meth]
     parts = (new Call func, args).compileNode o
-    if func.isGenerator
+    if func.isGenerator or func.base?.isGenerator
       parts.unshift @makeCode "(yield* "
       parts.push    @makeCode ")"
     parts
@@ -453,11 +453,13 @@ exports.Return = class Return extends Base
 
   compileNode: (o) ->
     answer = []
+    exprIsYieldReturn = @expression?.isYieldReturn?()
     # TODO: If we call expression.compile() here twice, we'll sometimes get back different results!
-    answer.push @makeCode @tab + "return#{if @expression then " " else ""}"
+    unless exprIsYieldReturn
+      answer.push @makeCode @tab + "return#{if @expression then " " else ""}"
     if @expression
       answer = answer.concat @expression.compileToFragments o, LEVEL_PAREN
-    answer.push @makeCode ";"
+    answer.push @makeCode ";" unless exprIsYieldReturn
     return answer
 
 #### Value
@@ -1674,6 +1676,9 @@ exports.Op = class Op extends Base
   isYield: ->
     @operator in ['yield', 'yield*']
 
+  isYieldReturn: ->
+    @isYield() and @first instanceof Return
+
   isUnary: ->
     not @second
 
@@ -1801,8 +1806,11 @@ exports.Op = class Op extends Base
     op = @operator
     if not o.scope.parent?
       @error 'yield statements must occur within a function generator.'
-    if 'expression' in Object.keys @first
-      parts.push @first.expression.compileToFragments o, LEVEL_OP if @first.expression?
+    if 'expression' in Object.keys(@first) and not (@first instanceof Throw)
+      if @isYieldReturn()
+        parts.push @first.compileToFragments o, LEVEL_TOP
+      else if @first.expression?
+        parts.push @first.expression.compileToFragments o, LEVEL_OP
     else
       parts.push [@makeCode "(#{op} "]
       parts.push @first.compileToFragments o, LEVEL_OP
